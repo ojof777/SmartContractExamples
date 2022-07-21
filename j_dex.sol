@@ -1,6 +1,5 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
-pragma experimental ABIEncoderV2;
 
 import "../contracts/j_wallet.sol";
 
@@ -44,8 +43,6 @@ contract Dex is Wallet {
         orders.push(
             Order(nextOrderId, msg.sender, side, ticker, amount, price, 0)
         );
-
-        //Bubble sort
         uint i = orders.length > 0 ? orders.length - 1 : 0;
         if(side == Side.BUY){
             while(i > 0){
@@ -105,9 +102,7 @@ contract Dex is Wallet {
             uint cost = filled.mul(orders[i].price);
 
             if(side == Side.BUY){
-                //Verify that the buyer has enough ETH to cover the purchase (require)
                 require(balances[msg.sender]["ETH"] >= cost);
-                //msg.sender is the buyer
                 balances[msg.sender][ticker] = balances[msg.sender][ticker].add(filled);
                 balances[msg.sender]["ETH"] = balances[msg.sender]["ETH"].sub(cost);
                 
@@ -115,7 +110,6 @@ contract Dex is Wallet {
                 balances[orders[i].trader]["ETH"] = balances[orders[i].trader]["ETH"].add(cost);
             }
             else if(side == Side.SELL){
-                //Msg.sender is the seller
                 balances[msg.sender][ticker] = balances[msg.sender][ticker].sub(filled);
                 balances[msg.sender]["ETH"] = balances[msg.sender]["ETH"].add(cost);
                 
@@ -124,10 +118,7 @@ contract Dex is Wallet {
             }
             
         }
-            //Remove 100% filled orders from the orderbook
         while(orders.length > 0 && orders[0].filled == orders[0].amount){
-            //Remove the top element in the orders array by overwriting every element
-            // with the next element in the order list
             for (uint256 i = 0; i < orders.length - 1; i++) {
                 orders[i] = orders[i + 1];
             }
